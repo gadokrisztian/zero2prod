@@ -11,7 +11,6 @@ pub struct FormData {
 }
 
 pub async fn subscibe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
-
     let request_id = Uuid::new_v4();
     let request_span = tracing::info_span!(
     "Adding a new subscriber.",
