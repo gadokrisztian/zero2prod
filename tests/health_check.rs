@@ -1,8 +1,14 @@
 use std::net::TcpListener;
-
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use once_cell::sync::Lazy;
+use zero2prod::telemetry::{get_subscriber, init_subscriber};
+
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let subscriber = get_subscriber("test".into(), "debug".into());
+    init_subscriber(subscriber);
+});
 
 pub struct TestApp {
     pub address: String,
@@ -11,6 +17,8 @@ pub struct TestApp {
 
 // Launch our application in the background
 async fn spawn_app() -> TestApp {
+    Lazy::force(&TRACING);
+
     // port 0: scan for an available port automatically
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind port.");
     let port = listener.local_addr().unwrap().port();
