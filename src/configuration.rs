@@ -1,4 +1,5 @@
 use secrecy::{ExposeSecret, Secret};
+use serde_aux::field_attributes::deserialize_number_from_string;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -44,7 +45,10 @@ impl TryFrom<String> for Environment {
         match s.to_lowercase().as_str() {
             "local" => Ok(Self::Local),
             "production" => Ok(Self::Production),
-            other => Err(format!("{} is not supported environment. User either `local` or `production`.", other)),
+            other => Err(format!(
+                "{} is not supported environment. User either `local` or `production`.",
+                other
+            )),
         }
     }
 }
@@ -61,7 +65,9 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     // Initialize our configuration reader
     let settings = config::Config::builder()
         .add_source(config::File::from(configuration_directory.join("base")).required(true))
-        .add_source(config::File::from(configuration_directory.join(environment.as_str())).required(true))
+        .add_source(
+            config::File::from(configuration_directory.join(environment.as_str())).required(true),
+        )
         .add_source(config::Environment::with_prefix("app").separator("__"))
         .build()
         .unwrap();
